@@ -8,7 +8,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-16.x%2B-green?style=flat-square" alt="Node Version">
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/License-LGPL--2.1-blue?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Type-Node.js%20Backend-orange?style=flat-square" alt="Type">
   <img src="https://img.shields.io/badge/Support-多模态%2F%20MCP%2F%20OpenAI%E5%85%BC%E5%AE%B9-purple?style=flat-square" alt="Support">
 </p>
@@ -46,7 +46,7 @@ Noelle 是一套**高拟人化二次元人设 AI 系统**，内置固定角色�
 ### 🖼️ 多模态 & 工具
 - 视觉模型自动识别，支持图片分析、压缩缩放
 - 全局剪贴板图片读取（Windows/macOS/Linux）
-- MCP 标准 6 大内置工具，可自由扩展
+- MCP 标准 13 个内置工具，可自由扩展
 - 纯文本/代码文件附加，超长内容自动截断保护
 
 ### 🖥️ 服务与终端
@@ -68,18 +68,16 @@ Noelle 是一套**高拟人化二次元人设 AI 系统**，内置固定角色�
 ## 📋 环境依赖
 - Node.js >= 16.x
 - 可选：Ollama / llama.cpp 本地大模型
-- 核心依赖包：
-  `http https ws fs path child_process chalk readline-sync inquirer net readline os clipboardy sharp`
 
 ## 🚀 快速部署
 ### 1. 安装依赖
 ```bash
-npm install ws chalk readline-sync inquirer clipboardy sharp
+npm install
 ```
 
 ### 2. 首次运行
 ```bash
-node index.js
+node src/index.js
 ```
 首次启动自动进入**初始化向导**：
 1. 选择后端类型：llama.cpp / ollama / 在线API
@@ -90,13 +88,13 @@ node index.js
 ### 3. 启动参数
 ```bash
 # 进入主菜单
-node index.js
+node src/index.js
 
 # 直接跳过菜单，进入CLI聊天
-node index.js --chat
+node src/index.js --chat
 
 # 查看帮助
-node index.js --help
+node src/index.js --help
 ```
 
 ## 🎮 CLI 常用命令
@@ -132,15 +130,47 @@ node index.js --help
 ## 📂 目录结构
 ```
 ./
-├── assets/            # 项目截图、封面图存放目录
-│   └── preview.png    # 项目预览图
-├── index.js           # 主程序入口
-├── .noll-env          # 全局配置（自动生成）
-├── profile.json       # 角色记忆&规则档案
-├── diary.txt          # AI 深夜复盘日记
-├── think_logs/        # 深度思考日志
-├── conversations/     # 多对话会话存档
-└── node_modules/      # 依赖包
+├── src/                    # 主程序源码
+│   ├── index.js            # 入口：服务启动、端口管理、命令解析
+│   ├── config.js           # .noll-env 配置加载/保存
+│   ├── state.js            # 角色状态：HP/MP/好感度/依赖度
+│   ├── core/               # 核心引擎
+│   │   ├── chat.js         # 聊天引擎：对话、JSON修复、工具调用
+│   │   ├── prompt.js       # 提示词构建、推理策略
+│   │   ├── consciousness.js # 潜意识沉思、空闲思考
+│   │   └── evolve.js       # 记忆进化、深度复盘
+│   ├── llm/                # 大模型引擎
+│   │   └── stream.js       # 流式推理：Ollama/llama.cpp/OpenAI
+│   ├── mcp/                # MCP 协议服务
+│   │   └── server.js       # 13个内置工具 + 资源 + 提示词
+│   ├── api/                # HTTP API 服务
+│   │   └── server.js       # OpenAI 兼容 API + 静态文件
+│   ├── ws/                 # WebSocket 服务
+│   │   ├── server.js       # 实时通信
+│   │   └── conversations.js # 多对话持久化
+│   ├── cli/                # 命令行界面
+│   │   ├── chat.js         # 沉浸式聊天
+│   │   ├── wizard.js       # 首次配置向导
+│   │   └── picker.js       # 文件选择器
+│   ├── ui/                 # 终端 UI
+│   │   └── display.js      # 打字机效果、spinner
+│   └── utils/              # 工具模块
+│       ├── models.js       # 模型列表获取
+│       ├── clipboard.js    # 跨平台剪贴板
+│       ├── image.js        # 图片处理
+│       ├── port.js         # 端口检测
+│       └── update.js       # 在线更新
+├── web/                    # Web 前端（深色主题）
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── Seop/                   # 项目截图
+├── scripts/                # 工具脚本
+├── packages/               # 更新包清单
+├── .noll-env               # 全局配置（自动生成，不提交）
+├── .gitignore
+├── package.json
+└── 白皮书.md               # 技术白皮书
 ```
 
 ## 🔌 开放接口
