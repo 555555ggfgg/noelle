@@ -5,4 +5,7 @@ diary.txt
 profile.json
 *.log
 *.webp
+*.swp
+*.swo
+f.t
 noelle.js
