@@ -1,5 +1,7 @@
 
 # Noelle AI System
+
+> 基于抖音作者牢三的诺艾尔系统的开源版本是复刻版本。
 <p align="center">
   <img src="Seop/1777781009368.png" alt="Noelle AI Preview" width="720">
 </p>
