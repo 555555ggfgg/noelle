@@ -4,4 +4,5 @@ think_logs/
 diary.txt
 profile.json
 *.log
+*.webp
 noelle.js
