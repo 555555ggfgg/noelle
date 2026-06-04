@@ -3,7 +3,7 @@
 
 > 基于抖音作者牢三的诺艾尔系统的开源版本是复刻版本。
 <p align="center">
-  <img src="Seop/1777781009368.png" alt="Noelle AI Preview" width="720">
+  <img src="Seop/noelle-screenshot.jpg" alt="Noelle AI Preview" width="720">
 </p>
 
 <p align="center">
@@ -54,9 +54,7 @@ Noelle 是一套**高拟人化二次元人设 AI 系统**，内置固定角色�
 - 端口自动检测、占用自动释放
 - 沉浸式 CLI 聊天：状态栏、命令补全、历史记录
 - 独立会话隔离，记忆互不干扰
-<img src="
-oM2XoLIfI4GMHxAB18XrlQfJbiAffMAayAQADC.webp
-" alt="主要是诺艾儿本人不愿意，我这个当主人的也做不了什么"><del><p>主要是诺艾儿本人不愿意，我(这里的我不是指的是项目发布者)这个当主人的也做不了什么</p></del>
+
 ## 🎭 角色信息
 ```json
 {
