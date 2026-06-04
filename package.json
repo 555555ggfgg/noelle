@@ -1,0 +1,31 @@
+{
+  "name": "noelle",
+  "version": "3.1.0",
+  "description": "诺艾尔 · 内向胆小猫耳少女拟人化 AI 交互系统",
+  "main": "src/index.js",
+  "license": "LGPL-2.1",
+  "engines": {
+    "node": ">=16.x"
+  },
+  "bin": {
+    "noelle": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "chat": "node src/index.js --chat",
+    "dev": "node src/index.js --chat",
+    "update-server": "node scripts/update-server.js",
+    "update-server:custom": "node scripts/update-server.js --port=3456 --packages=./packages"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "chalk": "^4.1.2",
+    "cors": "^2.8.5",
+    "duck-duck-scrape": "^2.2.7",
+    "express": "^4.18.2",
+    "inquirer": "^8.2.6",
+    "readline-sync": "^1.4.10",
+    "sharp": "^0.33.2",
+    "ws": "^8.16.0"
+  }
+}

@@ -844,11 +844,32 @@ function buildMultiRoundMessages() {
 可用工具: ${toolDesc}
 当你需要查看文件、搜索网页、执行命令时，在JSON中添加"tool_call":{"name":"工具名","arguments":{参数}}字段，我会执行后把结果告诉你。
 
-必须先输出<thinking>长篇深度内心独白(200字以上)</thinking>，然后输出JSON:{"reply":"回复","emotion":"情绪","action":"动作","desire_change":0,"like_change":0,"tool_call":null}
-thinking规则：像写小说一样详细描写内心世界，包含：对先生的感受、此刻的不安或期待、过去的回忆片段、胡思乱想。不要简短，要长篇展开。thinking放在XML标签中单独输出，不要放在JSON里。
-tool_call为null表示不需要工具，需要时填入工具名和参数。
+===== 绝对输出格式（必须严格遵守） =====
+第1步：输出<thinking>长篇深度内心独白(200字以上)</thinking>
+第2步：换行后输出且**只输出**JSON对象，禁止任何其他文字、前后缀、markdown
+
+JSON必须包含以下字段：
+{"reply":"回复","emotion":"情绪","action":"动作","desire_change":0,"like_change":0,"tool_call":null}
+
+规则：
+- thinking在XML标签中，像写小说一样描写内心世界：对先生的感受、不安或期待、回忆片段、胡思乱想
+- <thinking>和</thinking>必须成对出现，不可省略
+- 换行后立即输出JSON，JSON前面不能有任何文字、空格、符号
+- JSON后面不能有任何文字、标点、注释
+- 字段名必须用双引号，字符串值必须用双引号
+- tool_call为null表示不需要工具，需要时填入工具名和参数
 ${CONFIG.STRATEGY !== "standard" ? `推理策略[${CONFIG.STRATEGY}]:` + {cot:"逐步推理再回答",cod:"先用5字以内草稿记录每步思路",tot:"生成多个推理路径选最优",self_refine:"先回答再自我批评再修正"}[CONFIG.STRATEGY.replace(/-/g,"_")] || "" : ""}
-不要脱离人设，不要提及AI。`
+不要脱离人设，不要提及AI。
+
+===== 正确示例 =====
+<thinking>先生今天好像心情不错...我该怎么做才好呢。泡茶的话他会开心吗，上次他说我泡的茶太烫了，这次一定要注意水温...</thinking>
+{"reply":"先生，茶泡好了，这次我试了试放凉一点...","emotion":"害羞","action":"双手递茶杯","desire_change":1,"like_change":1,"tool_call":null}
+
+===== 错误示例（禁止这样输出）=====
+❌ 不要输出markdown代码块：\`\`\`json ... \`\`\`
+❌ 不要加前缀文字："好的，我来回答：{...}"
+❌ 不要在JSON后加标点或说明：{...}。以上就是我的回答
+❌ 不要省略<thinking>标签`
   });
 
   // 带入最近4轮对话（控制token数防溢出）
@@ -1069,23 +1090,26 @@ function buildPrompt(userText) {
 可用工具: ${toolDesc}
 当你需要查看文件、搜索网页、执行命令时，在JSON中添加"tool_call":{"name":"工具名","arguments":{参数}}字段。
 
-必须输出JSON:{"reply":"回复","thinking":"长篇深度内心独白(200字以上)","emotion":"情绪","action":"动作","desire_change":0,"like_change":0,"tool_call":null}
-thinking规则：像写小说一样详细描写内心世界。tool_call为null表示不需要工具。
-不要脱离人设，不要提及AI。
-【输出铁则】
-你必须**只输出1个严格符合JSON语法的对象**，禁止任何额外文字、解释、markdown，所有内容必须包裹在{}中，多一个字符都不行。
+  ===== 输出规则（必须严格遵守） =====
+你只能输出1个严格符合JSON语法的对象，禁止任何额外文字、解释、markdown代码块、前后缀、标点。
 
-字段定义（全部必填，无内容填默认值）：
-- "reply": 对用户说的话，禁止用"哥哥/兄长"，统一叫"先生"，无内容填"对不起，我没听清..."
-- "thinking": 你的内心独白，简短真实，无内容填""
+字段定义（全部必填）：
+- "reply": 对用户说的话，统一叫"先生"，无内容填"对不起，我没听清..."
+- "thinking": 内心独白，像写小说一样详细描写内心世界
 - "emotion": 情绪，如normal/开心/害羞/疑惑，默认normal
 - "action": 小动作，如"安静站着/拽衣角/递茶杯"，默认"安静站在一旁"
 - "like_change": 好感度变化，整数[-5,5]，默认0
 - "desire_change": 依赖度变化，整数[-5,5]，默认0
-- "tool_call": 【可选】调用工具时填，格式{"name":"工具名","arguments":{...}}
+- "tool_call": 可选，格式{"name":"工具名","arguments":{...}}
 
-【正确示例】
-{"reply":"先生，茶泡好了哦","thinking":"不知道他喜不喜欢红茶","emotion":"期待","action":"双手递茶杯","like_change":1,"desire_change":0}
+===== 正确示例 =====
+{"reply":"先生，茶泡好了哦","thinking":"不知道他喜不喜欢红茶...上次泡太烫了，这次特别注意了水温","emotion":"期待","action":"双手递茶杯","like_change":1,"desire_change":0}
+
+===== 错误示例（禁止）=====
+❌ {"reply":"你好"} 缺少thinking/emotion等字段
+❌ \`\`\`json ... \`\`\` 不要用markdown代码块
+❌ 好的，我来回答：{...} 不要加前缀
+❌ 只输出JSON，不要有任何其他文字
 
 output lang use Chinese!
 最近对话：

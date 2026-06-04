@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>诺艾尔 — 内向胆小猫耳少女</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="avatar-large">
+          <div class="avatar-ring">
+            <div class="avatar-inner">🐱</div>
+          </div>
+        </div>
+        <h1 class="char-name">诺艾尔</h1>
+        <p class="char-title">内向胆小猫耳少女</p>
+        <p class="char-desc">敏感 · 缺安全感 · 轻声细语 · 依赖先生</p>
+      </div>
+
+      <div class="status-panel">
+        <div class="stat-row">
+          <span class="stat-label">❤️ HP</span>
+          <div class="stat-bar"><div id="hp-bar" class="stat-fill hp-fill" style="width:100%"></div></div>
+          <span id="hp-text" class="stat-value">100</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">✨ MP</span>
+          <div class="stat-bar"><div id="mp-bar" class="stat-fill mp-fill" style="width:98%"></div></div>
+          <span id="mp-text" class="stat-value">98</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">💕 好感度</span>
+          <div class="stat-bar"><div id="like-bar" class="stat-fill like-fill" style="width:60%"></div></div>
+          <span id="like-text" class="stat-value">599</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">🫶 依赖度</span>
+          <div class="stat-bar"><div id="desire-bar" class="stat-fill desire-fill" style="width:3%"></div></div>
+          <span id="desire-text" class="stat-value">3</span>
+        </div>
+      </div>
+
+      <div class="emotion-display" id="emotion-box">
+        <span id="emotion-icon">😶</span>
+        <span id="emotion-text">安静</span>
+      </div>
+
+      <!-- Conversation List -->
+      <div class="conv-section">
+        <div class="conv-header">
+          <span>💬 对话列表</span>
+          <button id="btn-refresh-conv" class="btn-icon-small" title="刷新">🔄</button>
+        </div>
+        <div id="conv-list" class="conv-list">
+          <div class="conv-empty">暂无对话</div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="model-info" id="model-info">模型: --</div>
+        <div class="footer-buttons">
+          <button id="btn-new-conv" class="btn-small">📝 新对话</button>
+          <button id="btn-mcp-info" class="btn-small">🤖 MCP</button>
+        </div>
+        <div class="connection-status" id="conn-status">○ 未连接</div>
+      </div>
+    </aside>
+
+    <!-- Main Chat -->
+    <main id="chat-area">
+      <div id="messages"></div>
+
+      <div id="typing-indicator" class="hidden">
+        <div class="typing-avatar">🐱</div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+        <span class="typing-text">诺艾尔正在输入...</span>
+      </div>
+
+      <div id="input-area">
+        <button id="btn-file" class="btn-icon" title="附加文件">📎</button>
+        <input type="file" id="file-input" accept=".txt,.js,.py,.json,.md,.csv,.html,.css,.jpg,.jpeg,.png,.gif,.webp" multiple hidden>
+        <div id="file-preview"></div>
+        <textarea id="msg-input" placeholder="对诺艾尔说点什么..." rows="1"></textarea>
+        <button id="btn-send" class="btn-send">发送</button>
+      </div>
+    </main>
+  </div>
+
+  <div id="thinking-overlay" class="hidden">
+    <div class="thinking-modal">
+      <div class="thinking-header">💭 诺艾尔的内心世界</div>
+      <div id="thinking-content"></div>
+    </div>
+  </div>
+
+  <div id="mcp-overlay" class="hidden">
+    <div class="thinking-modal" style="max-width:720px">
+      <div class="thinking-header">🤖 MCP Server (Anthropic Protocol 2025-11-25)</div>
+      <div id="mcp-content" style="font-size:13px;line-height:1.8;color:#ccc"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

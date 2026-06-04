@@ -1,0 +1,6 @@
+node_modules/
+.noll-env
+think_logs/
+diary.txt
+profile.json
+*.log

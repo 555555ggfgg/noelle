@@ -1,0 +1,11 @@
+{
+  "latestVersion": "3.1.0",
+  "releases": [
+    {
+      "version": "3.1.0",
+      "date": "2026-06-01",
+      "changelog": "- Initial OpenRouter integration\n- Dynamic model list\n- JSON repair engine v2\n- CLI model picker",
+      "size": 0
+    }
+  ]
+}
