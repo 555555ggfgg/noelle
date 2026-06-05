@@ -89,22 +89,53 @@ async function setupOllama() {
 
 async function setupAPI() {
   const providers = [
-    { name: "OpenRouter", base: "https://openrouter.ai/api/v1/chat/completions", def: "" },
-    { name: "硅基流动", base: "https://api.siliconflow.cn/v1/chat/completions", def: "Qwen/Qwen2.5-7B-Instruct" },
-    { name: "DeepSeek", base: "https://api.deepseek.com/v1/chat/completions", def: "deepseek-chat" },
-    { name: "百度文心一言", base: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions", def: "ernie-3.5-8k" },
-    { name: "自定义", base: "", def: "" }
+    { id: "openai",    name: "OpenAI",            base: "https://api.openai.com/v1/chat/completions",                                     def: "gpt-4o-mini" },
+    { id: "anthropic", name: "Anthropic (Claude)", base: "https://api.anthropic.com/v1/messages",                                           def: "claude-sonnet-4-20250514" },
+    { id: "openrouter",name: "OpenRouter",         base: "https://openrouter.ai/api/v1/chat/completions",                                  def: "" },
+    { id: "azure",     name: "Azure OpenAI",       base: "",                                                                                def: "gpt-4o-mini" },
+    { id: "google",    name: "Google Gemini",      base: "https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?alt=sse", def: "gemini-2.0-flash" },
+    { id: "groq",      name: "Groq",               base: "https://api.groq.com/openai/v1/chat/completions",                                def: "llama-3.3-70b-versatile" },
+    { id: "together",  name: "Together AI",        base: "https://api.together.xyz/v1/chat/completions",                                   def: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
+    { id: "mistral",   name: "Mistral AI",         base: "https://api.mistral.ai/v1/chat/completions",                                     def: "mistral-large-latest" },
+    { id: "perplexity",name: "Perplexity",          base: "https://api.perplexity.ai/chat/completions",                                     def: "sonar-pro" },
+    { id: "xai",       name: "xAI Grok",           base: "https://api.x.ai/v1/chat/completions",                                           def: "grok-2-latest" },
+    { id: "deepseek",  name: "DeepSeek",           base: "https://api.deepseek.com/v1/chat/completions",                                   def: "deepseek-chat" },
+    { id: "硅基流动",   name: "硅基流动",           base: "https://api.siliconflow.cn/v1/chat/completions",                                 def: "Qwen/Qwen2.5-7B-Instruct" },
+    { id: "百度",       name: "百度文心一言",       base: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions", def: "ernie-3.5-8k" },
+    { id: "custom",    name: "自定义",              base: "",                                                                                def: "" }
   ];
   const pNames = providers.map(x => x.name);
   const pid = await selectMenu(pNames, "选择API提供商");
   const p = providers[pid];
-  config.set("API_PROVIDER", p.name);
+  config.set("API_PROVIDER", p.id);
   config.set("API_BASE_URL", input("API地址", p.base));
   config.set("API_KEY", input("API密钥"));
 
-  if (p.name === "OpenRouter") {
+  if (p.id === "openrouter") {
     await setupOpenRouterModel();
-  } else if (p.name === "自定义") {
+  } else if (p.id === "azure") {
+    config.set("API_BASE_URL", input("Azure OpenAI 端点 (含部署名)", "https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions"));
+    config.set("API_MODEL", input("模型部署名", "gpt-4o-mini"));
+    config.set("OPENAI_API_VERSION", input("API版本", "2024-08-01-preview"));
+  } else if (p.id === "openai") {
+    const orgId = input("组织ID (可选，留空跳过)");
+    if (orgId) config.set("OPENAI_ORG_ID", orgId);
+    const reasoningEffort = await selectMenu(["禁用", "启用"], "启用 o1/o3 推理参数 (reasoning_effort)？");
+    if (reasoningEffort === 1) {
+      config.set("REASONING_EFFORT", input("推理力度 (low/medium/high)", "medium"));
+    }
+    config.set("API_MODEL", input("模型名", p.def));
+  } else if (p.id === "anthropic") {
+    config.set("API_MODEL", input("模型名", p.def));
+    config.set("ANTHROPIC_API_VERSION", input("API版本", config.get("ANTHROPIC_API_VERSION")));
+  } else if (p.id === "google") {
+    config.set("GOOGLE_API_KEY", input("Google API密钥"));
+    const model = input("模型名", p.def);
+    config.set("API_MODEL", model);
+    const baseUrl = config.get("API_BASE_URL").replace("{model}", model);
+    config.set("API_BASE_URL", baseUrl);
+    config.set("API_KEY", config.get("GOOGLE_API_KEY"));
+  } else if (p.id === "custom") {
     config.set("API_MODEL", input("模型名", ""));
   } else {
     config.set("API_MODEL", input("模型名", p.def));

@@ -256,6 +256,17 @@ function streamAttemptRequest(promptConfig, onStructuredChunk) {
 
         const userIdentifier = config.get('OPENROUTER_USER');
         if (userIdentifier) reqBody.user = userIdentifier;
+      } else if (provider === 'openai') {
+        const reasoningEffort = config.get('REASONING_EFFORT');
+        if (reasoningEffort) {
+          reqBody.reasoning_effort = reasoningEffort;
+        }
+        delete reqBody.stop;
+      } else if (provider === 'anthropic') {
+        reqBody.max_tokens = parseInt(promptConfig.n_predict) || 1024;
+        delete reqBody.stop;
+        delete reqBody.temperature;
+        delete reqBody.top_p;
       }
 
       const postData = JSON.stringify(reqBody);
@@ -278,8 +289,16 @@ function streamAttemptRequest(promptConfig, onStructuredChunk) {
         headers['HTTP-Referer'] = referer;
         headers['X-OpenRouter-Title'] = title;
       } else if (provider === 'anthropic') {
-        headers['anthropic-version'] = '2023-06-01';
+        headers['anthropic-version'] = config.get('ANTHROPIC_API_VERSION') || '2023-06-01';
         headers['x-api-key'] = apiKey;
+        delete headers['Authorization'];
+      } else if (provider === 'openai') {
+        const orgId = config.get('OPENAI_ORG_ID');
+        if (orgId) headers['OpenAI-Organization'] = orgId;
+      } else if (provider === 'azure') {
+        const apiVersion = config.get('OPENAI_API_VERSION');
+        if (apiVersion) url.searchParams.set('api-version', apiVersion);
+        headers['api-key'] = apiKey;
         delete headers['Authorization'];
       }
 
@@ -299,56 +318,90 @@ function streamAttemptRequest(promptConfig, onStructuredChunk) {
           return;
         }
 
-        res.on('data', chunk => {
-          try {
-            const lines = chunk.toString('utf8').split('\n').filter(l => l.trim());
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const jsonStr = line.slice(6);
-                if (jsonStr && jsonStr !== '[DONE]') {
+        if (provider === 'anthropic') {
+          let eventBuffer = '';
+          let currentEvent = '';
+
+          res.on('data', chunk => {
+            try {
+              eventBuffer += chunk.toString('utf8');
+              const lines = eventBuffer.split('\n');
+              eventBuffer = lines.pop() || '';
+
+              for (const line of lines) {
+                if (line.startsWith('event: ')) {
+                  currentEvent = line.slice(7).trim();
+                } else if (line.startsWith('data: ')) {
+                  const jsonStr = line.slice(6).trim();
+                  if (!jsonStr) continue;
                   const data = JSON.parse(jsonStr);
 
-                  if (data.error) {
-                    console.error('OpenRouter stream error:', data.error.message || JSON.stringify(data.error));
-                    if (data.choices?.[0]?.finish_reason === 'error') {
-                      finishOnce(fullContent, deepThinkContent);
-                      return;
+                  if (currentEvent === 'content_block_delta' && data.delta?.text) {
+                    parseAndEmit(data.delta.text);
+                  } else if (currentEvent === 'message_start' && data.content) {
+                    for (const block of data.content) {
+                      if (block.text) parseAndEmit(block.text);
                     }
-                  }
-
-                  if (data.usage) {
+                  } else if (currentEvent === 'message_delta' && data.usage) {
                     streamUsage = data.usage;
-                  }
-
-                  const thinkChunk = data.choices?.[0]?.thinking
-                    || data.choices?.[0]?.delta?.reasoning_content
-                    || data.choices?.[0]?.delta?.thinking
-                    || data.choices?.[0]?.delta?.reasoning
-                    || "";
-                  if (thinkChunk) {
-                    deepThinkContent += thinkChunk;
-                    emitChunk('think', thinkChunk);
-                  }
-
-                  const reasoningDetails = data.choices?.[0]?.delta?.reasoning_details;
-                  if (reasoningDetails && Array.isArray(reasoningDetails)) {
-                    for (const detail of reasoningDetails) {
-                      if (detail.type === 'reasoning.text' && detail.text) {
-                        deepThinkContent += detail.text;
-                        emitChunk('think', detail.text);
-                      }
-                    }
-                  }
-
-                  if (data.choices?.[0]?.delta?.content) {
-                    parseAndEmit(data.choices[0].delta.content);
                   }
                 }
               }
-            }
-          } catch (e) { }
-        });
-        res.on('end', () => finishOnce(fullContent, deepThinkContent));
+            } catch (e) { }
+          });
+          res.on('end', () => finishOnce(fullContent, deepThinkContent));
+        } else {
+          res.on('data', chunk => {
+            try {
+              const lines = chunk.toString('utf8').split('\n').filter(l => l.trim());
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const jsonStr = line.slice(6);
+                  if (jsonStr && jsonStr !== '[DONE]') {
+                    const data = JSON.parse(jsonStr);
+
+                    if (data.error) {
+                      console.error(`${provider} stream error:`, data.error.message || JSON.stringify(data.error));
+                      if (data.choices?.[0]?.finish_reason === 'error') {
+                        finishOnce(fullContent, deepThinkContent);
+                        return;
+                      }
+                    }
+
+                    if (data.usage) {
+                      streamUsage = data.usage;
+                    }
+
+                    const thinkChunk = data.choices?.[0]?.thinking
+                      || data.choices?.[0]?.delta?.reasoning_content
+                      || data.choices?.[0]?.delta?.thinking
+                      || data.choices?.[0]?.delta?.reasoning
+                      || "";
+                    if (thinkChunk) {
+                      deepThinkContent += thinkChunk;
+                      emitChunk('think', thinkChunk);
+                    }
+
+                    const reasoningDetails = data.choices?.[0]?.delta?.reasoning_details;
+                    if (reasoningDetails && Array.isArray(reasoningDetails)) {
+                      for (const detail of reasoningDetails) {
+                        if (detail.type === 'reasoning.text' && detail.text) {
+                          deepThinkContent += detail.text;
+                          emitChunk('think', detail.text);
+                        }
+                      }
+                    }
+
+                    if (data.choices?.[0]?.delta?.content) {
+                      parseAndEmit(data.choices[0].delta.content);
+                    }
+                  }
+                }
+              }
+            } catch (e) { }
+          });
+          res.on('end', () => finishOnce(fullContent, deepThinkContent));
+        }
       });
 
       req.on('timeout', () => { req.destroy(); finishOnce(fullContent || "", deepThinkContent); });
