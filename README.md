@@ -14,13 +14,13 @@
 </p>
 
 > 内向胆小猫耳少女拟人化 AI 交互系统 | Node.js 全栈实现
-支持 Ollama / llama.cpp / OpenAI 兼容API、多模态图像、MCP 工具协议、WebSocket 服务、CLI 沉浸式聊天、记忆进化与深度思考。
+支持 Ollama / llama.cpp / OpenAI / Anthropic / Google Gemini / Groq / DeepSeek 等 14+ 在线API、多模态图像、MCP 工具协议、WebSocket 服务、CLI 沉浸式聊天、记忆进化与深度思考。
 
 ## 📌 项目介绍
 Noelle 是一套**高拟人化二次元人设 AI 系统**，内置固定角色「诺艾儿」：敏感内向、缺乏安全感、轻声细语，统一称呼用户为**先生**。
 
 集成能力：
-- 多后端自由切换：本地 Ollama / llama.cpp / 在线API(OpenRouter/硅基流动等)
+- 多后端自由切换：本地 Ollama / llama.cpp / 在线API (OpenAI / Anthropic / OpenRouter / Google Gemini / Azure / Groq / Together AI / Mistral / Perplexity / xAI / DeepSeek / 硅基流动 / 百度等)
 - 深度思考流 + 内心独白 + 情绪/动作 结构化输出
 - HP / MP / 好感度 / 依赖度 动态人设数值系统
 - MCP 标准工具调用：读文件/编辑文件/网页抓取/搜索引擎/Shell执行/图像分析
@@ -81,9 +81,10 @@ node src/index.js
 ```
 首次启动自动进入**初始化向导**：
 1. 选择后端类型：llama.cpp / ollama / 在线API
-2. 自动检测本地模型、端口占用
-3. 配置端口、IP、API密钥、模型名称
-4. 自动生成 `.noll-env` 配置文件永久保存
+2. 选择提供商：OpenAI / Anthropic / OpenRouter / Google Gemini / Azure / Groq / Together AI / Mistral / Perplexity / xAI / DeepSeek / 硅基流动 / 百度 或自定义
+3. 自动检测本地模型、端口占用
+4. 配置端口、IP、API密钥、模型名称
+5. 自动生成 `.noll-env` 配置文件永久保存
 
 ### 3. 启动参数
 ```bash
@@ -119,7 +120,11 @@ node src/index.js --help
 - `PORT`：WebSocket 服务端口
 - `BIND_IP`：绑定监听IP
 - `BACKEND_TYPE`：ollama / llama.cpp / api
+- `API_PROVIDER`：openai / anthropic / openrouter / azure / google / groq / together / mistral / perplexity / xai / deepseek 等
 - `API_MODEL`：指定大模型名称（自动识别视觉模型）
+- `OPENAI_ORG_ID`：OpenAI 组织 ID（可选）
+- `ANTHROPIC_API_VERSION`：Anthropic API 版本（默认 2023-06-01）
+- `OPENAI_API_VERSION`：Azure API 版本
 - `STRATEGY`：推理策略 `standard/cot/cod/tot/self-refine`
 - `STREAM_TYPING_SPEED`：打字机逐字间隔
 - `THOUGHT_COOLDOWN`：潜意识沉思触发间隔
@@ -140,7 +145,7 @@ node src/index.js --help
 │   │   ├── consciousness.js # 潜意识沉思、空闲思考
 │   │   └── evolve.js       # 记忆进化、深度复盘
 │   ├── llm/                # 大模型引擎
-│   │   └── stream.js       # 流式推理：Ollama/llama.cpp/OpenAI
+│   │   └── stream.js       # 流式推理：Ollama/llama.cpp/14+在线API
 │   ├── mcp/                # MCP 协议服务
 │   │   └── server.js       # 13个内置工具 + 资源 + 提示词
 │   ├── api/                # HTTP API 服务
@@ -176,7 +181,24 @@ node src/index.js --help
 ## 🔌 开放接口
 - WebSocket：实时拟人化对话推送
 - MCP Endpoint：`http://ip:port+1/mcp` 标准 MCP JSON-RPC
-- OpenAI 兼容API：支持任意 ChatGPT 客户端接入
+- OpenAI 兼容API：支持任意 OpenAI 客户端接入（含流式输出、token 用量）
+
+## 🌐 支持的 API 提供商
+| 提供商 | 协议 | 默认模型 |
+|--------|------|----------|
+| OpenAI | OpenAI 兼容 | `gpt-4o-mini` |
+| Anthropic (Claude) | Anthropic Messages | `claude-sonnet-4-20250514` |
+| OpenRouter | OpenAI 兼容 | 在线选择 |
+| Azure OpenAI | OpenAI 兼容 | `gpt-4o-mini` |
+| Google Gemini | Google SSE | `gemini-2.0-flash` |
+| Groq | OpenAI 兼容 | `llama-3.3-70b-versatile` |
+| Together AI | OpenAI 兼容 | `meta-llama/Llama-3.3-70B-Instruct-Turbo` |
+| Mistral AI | OpenAI 兼容 | `mistral-large-latest` |
+| Perplexity | OpenAI 兼容 | `sonar-pro` |
+| xAI Grok | OpenAI 兼容 | `grok-2-latest` |
+| DeepSeek | OpenAI 兼容 | `deepseek-chat` |
+| 硅基流动 | OpenAI 兼容 | `Qwen/Qwen2.5-7B-Instruct` |
+| 百度文心一言 | 百度自定义 | `ernie-3.5-8k` |
 
 ## 📄 许可证
 [ License](LICENSE)  
